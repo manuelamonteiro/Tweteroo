@@ -88,14 +88,20 @@ app.get("/tweets", (req, res) => {
 app.post("/sign-up", (req, res) => {
     const { username, avatar } = req.body;
 
+    if(!username || !avatar){
+        res.status(400).send("Todos os campos são obrigatórios!");
+        return;
+    }
+
     const user = {
         username: username,
         avatar: avatar
     };
 
     userServer.push(user);
+    console.log(userServer)
 
-    res.send("OK!");
+    res.status(201).send("OK!");
 });
 
 app.post("/tweets", (req, res) => {
@@ -106,6 +112,11 @@ app.post("/tweets", (req, res) => {
         avatar = isUser.avatar;
     }
 
+    if(!username || !tweet){
+        res.status(400).send("Todos os campos são obrigatórios!");
+        return;
+    }
+
     const userTweet = {
         username: username,
         avatar: avatar,
@@ -114,7 +125,7 @@ app.post("/tweets", (req, res) => {
 
     tweetsServer.push(userTweet);
 
-    res.send("OK!");
+    res.status(201).send("OK!");
 })
 
 app.listen(5000, () => {
