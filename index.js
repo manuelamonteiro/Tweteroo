@@ -7,62 +7,7 @@ app.use(express.json());
 
 let tweetsServer = [
     {
-        username: "bobesponja1",
-        avatar: "https://super.abril.com.br/wp-content/uploads/2020/09/04-09_gato_SITE.jpg?quality=70&strip=info",
-        tweet: "eu amo o hub"
-    },
-    {
-        username: "bobesponja2",
-        avatar: "https://super.abril.com.br/wp-content/uploads/2020/09/04-09_gato_SITE.jpg?quality=70&strip=info",
-        tweet: "eu amo o hub"
-    },
-    {
-        username: "bobesponja3",
-        avatar: "https://super.abril.com.br/wp-content/uploads/2020/09/04-09_gato_SITE.jpg?quality=70&strip=info",
-        tweet: "eu amo o hub"
-    },
-    {
-        username: "bobesponja4",
-        avatar: "https://super.abril.com.br/wp-content/uploads/2020/09/04-09_gato_SITE.jpg?quality=70&strip=info",
-        tweet: "eu amo o hub"
-    },
-    {
-        username: "bobesponja5",
-        avatar: "https://super.abril.com.br/wp-content/uploads/2020/09/04-09_gato_SITE.jpg?quality=70&strip=info",
-        tweet: "eu amo o hub"
-    },
-    {
-        username: "bobesponja6",
-        avatar: "https://super.abril.com.br/wp-content/uploads/2020/09/04-09_gato_SITE.jpg?quality=70&strip=info",
-        tweet: "eu amo o hub"
-    },
-    {
-        username: "bobesponja7",
-        avatar: "https://super.abril.com.br/wp-content/uploads/2020/09/04-09_gato_SITE.jpg?quality=70&strip=info",
-        tweet: "eu amo o hub"
-    },
-    {
-        username: "bobesponja8",
-        avatar: "https://super.abril.com.br/wp-content/uploads/2020/09/04-09_gato_SITE.jpg?quality=70&strip=info",
-        tweet: "eu amo o hub"
-    },
-    {
-        username: "bobesponja9",
-        avatar: "https://super.abril.com.br/wp-content/uploads/2020/09/04-09_gato_SITE.jpg?quality=70&strip=info",
-        tweet: "eu amo o hub"
-    },
-    {
-        username: "bobesponja10",
-        avatar: "https://super.abril.com.br/wp-content/uploads/2020/09/04-09_gato_SITE.jpg?quality=70&strip=info",
-        tweet: "eu amo o hub"
-    },
-    {
-        username: "bobesponja11",
-        avatar: "https://super.abril.com.br/wp-content/uploads/2020/09/04-09_gato_SITE.jpg?quality=70&strip=info",
-        tweet: "eu amo o hub"
-    },
-    {
-        username: "bobesponja12",
+        username: "bobesponja",
         avatar: "https://super.abril.com.br/wp-content/uploads/2020/09/04-09_gato_SITE.jpg?quality=70&strip=info",
         tweet: "eu amo o hub"
     }
@@ -70,28 +15,38 @@ let tweetsServer = [
 
 let userServer = [];
 
-let avatar;
-
 app.get("/tweets", (req, res) => {
     let lastTweets = [];
     let lastsPositions = tweetsServer.length - 10;
 
+    tweetsServer.forEach((tweet) => {
+        const { avatar } = userServer.find((user) => user.username === tweet.username);
+        tweet.avatar = avatar;
+    });
+
     if (tweetsServer.length < 10) {
         lastTweets = tweetsServer;
     } else {
-        lastTweets = tweetsServer.slice(lastsPositions);
+        lastTweets = tweetsServer.slice(lastsPositions).reverse();
     }
 
-    res.status(200).send(lastTweets);
+    res.status(200).send(lastTweets.reverse());
 });
 
 app.post("/sign-up", (req, res) => {
     const { username, avatar } = req.body;
 
-    if(!username || !avatar){
-        res.status(400).send("Todos os campos são obrigatórios!");
+    if (!username || !avatar) {
+        res.status(400).send({ message: "Todos os campos são obrigatórios!" });
         return;
-    }
+    };
+
+    const isUserExists = userServer.find((user) => user.username === username);
+
+    if (isUserExists) {
+        res.status(409).send({ message: "O usuário já existe." });
+        return;
+    };
 
     const user = {
         username: username,
@@ -99,34 +54,28 @@ app.post("/sign-up", (req, res) => {
     };
 
     userServer.push(user);
-    console.log(userServer)
 
-    res.status(201).send("OK!");
+    res.status(201).send({ message: "OK!" });
 });
 
 app.post("/tweets", (req, res) => {
+    const { user } = req.headers;
     const { username, tweet } = req.body;
-    const isUser = userServer.find((object) => object.username === username);
 
-    if (isUser){
-        avatar = isUser.avatar;
-    }
-
-    if(!username || !tweet){
-        res.status(400).send("Todos os campos são obrigatórios!");
+    if (!username || !tweet) {
+        res.status(400).send({ message: "Todos os campos são obrigatórios!" });
         return;
-    }
+    };
 
     const userTweet = {
-        username: username,
-        avatar: avatar,
+        username: user,
         tweet: tweet
     };
 
     tweetsServer.push(userTweet);
 
-    res.status(201).send("OK!");
-})
+    res.status(201).send({ message: "OK!" });
+});
 
 app.listen(5000, () => {
     console.log("Server running in port: 5000");
