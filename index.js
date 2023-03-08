@@ -14,20 +14,16 @@ let tweetsServer = [
 ];
 
 let userServer = [];
+let avatar;
 
 app.get("/tweets", (req, res) => {
     let lastTweets = [];
     let lastsPositions = tweetsServer.length - 10;
 
-    tweetsServer.forEach((tweet) => {
-        const { avatar } = userServer.find((user) => user.username === tweet.username);
-        tweet.avatar = avatar;
-    });
-
     if (tweetsServer.length < 10) {
         lastTweets = tweetsServer;
     } else {
-        lastTweets = tweetsServer.slice(lastsPositions).reverse();
+        lastTweets = tweetsServer.slice(lastsPositions);
     }
 
     res.status(200).send(lastTweets.reverse());
@@ -59,22 +55,27 @@ app.post("/sign-up", (req, res) => {
 });
 
 app.post("/tweets", (req, res) => {
-    const { user } = req.headers;
-    const { tweet } = req.body;
+    const { username, tweet } = req.body;
+    const isUser = userServer.find((object) => object.username === username);
+    
+    if (isUser){
+        avatar = isUser.avatar;
+    }
 
-    if (!user || !tweet) {
-        res.status(400).send({ message: "Todos os campos são obrigatórios!" });
+    if(!username || !tweet){
+        res.status(400).send("Todos os campos são obrigatórios!");
         return;
-    };
+    }
 
     const userTweet = {
-        username: user,
+        username: username,
+        avatar: avatar,
         tweet: tweet
     };
 
     tweetsServer.push(userTweet);
 
-    res.status(201).send({ message: "OK!" });
+    res.status(201).send("OK!");
 });
 
 app.listen(5000, () => {
